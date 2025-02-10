@@ -1,6 +1,6 @@
 CC = gcc
 CDEVFLAGS = -std=c99 -g -Wall -Wextra
-CRELFLAGS = -std=c99 -Ofast -DNDEBUG
+CRELFLAGS = -std=c99 -O2 -DNDEBUG
 # CBENCHFLAGS = -std=c99 -Ofast -DNDEBUG -g -pg
 # CVISFLAGS = -std=c99 -g -Wall -Wextra -lraylib
 LDFLAGS = 
