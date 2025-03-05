@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #define WIN_WIDTH 1200
 #define WIN_HEIGHT 800
@@ -16,6 +17,8 @@
 
 #define UCLAMP(x, m) ((x) > (m) ? (m) : (x))
 #define WRAP_ASSIGN(fptr, fmin, fmax) *fptr = Wrap(*fptr, fmin, fmax)
+
+typedef Rectangle Rect;
 
 typedef enum
 {
@@ -44,9 +47,19 @@ typedef struct
 typedef struct
 {
     Rectangle hitbox;
+    float depth;
     Sprite sprite;
     float speed;
 } Entity;
+
+typedef struct
+{
+    size_t len;
+    size_t size;
+    Entity *entities;
+} EntityManager;
+
+static EntityManager entman = {0};
 
 static inline uint32_t udiv(uint32_t n, uint32_t d)
 {
@@ -68,7 +81,18 @@ static inline Rectangle SpriteBox(Sprite sp)
     };
 
     return rec;
-} 
+}
+
+size_t CheckEntityCollision(Rect rect)
+{
+    size_t i = 0;
+
+    for (; i < entman.len; i++)
+        if (CheckCollisionRecs(entman.entities[i].hitbox, rect))
+            return i;
+
+    return i;
+}
 
 int main(void)
 {
@@ -78,7 +102,6 @@ int main(void)
 
     Image sp_player_base = LoadImage("sp_player.png");
     
-
     ImageColorContrast(&sp_player_base, 50);
     
     Entity e2 = {
@@ -152,11 +175,6 @@ int main(void)
             idle = 0;
         }
 
-        if (idle)
-        {
-            p1.sprite.offset.x = 1;
-        }
-
         vel = Vector2ClampValue(vel, -1, 1);
         vel = Vector2Scale(vel, p1.speed * GetFrameTime());
 
@@ -175,6 +193,15 @@ int main(void)
 
         p1.hitbox.y =
             Clamp(p1.hitbox.y, 0, WIN_HEIGHT - p1.hitbox.height);
+
+        if (idle)
+        {
+            p1.sprite.offset.x = 1;
+        }
+        else
+        {
+            // ReorderDrawing
+        }
 
         BeginDrawing();
             ClearBackground(DARK);
